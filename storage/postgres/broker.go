@@ -29,12 +29,12 @@ type brokerStorage struct {
 func (bs *brokerStorage) Create(ctx context.Context, broker *types.Broker) (string, error) {
 	b := &Broker{}
 	b.FromDTO(broker)
-	return create(ctx, bs.db, brokerTable, b)
+	return Create(ctx, bs.db, brokerTable, b)
 }
 
 func (bs *brokerStorage) Get(ctx context.Context, id string) (*types.Broker, error) {
 	broker := &Broker{}
-	if err := get(ctx, bs.db, id, brokerTable, broker); err != nil {
+	if err := Get(ctx, bs.db, id, brokerTable, broker); err != nil {
 		return nil, err
 	}
 	return broker.ToDTO(), nil
@@ -42,7 +42,7 @@ func (bs *brokerStorage) Get(ctx context.Context, id string) (*types.Broker, err
 
 func (bs *brokerStorage) List(ctx context.Context) ([]*types.Broker, error) {
 	var brokerDTOs []Broker
-	err := list(ctx, bs.db, brokerTable, map[string][]string{}, &brokerDTOs)
+	err := List(ctx, bs.db, brokerTable, map[string][]string{}, &brokerDTOs)
 	if err != nil || len(brokerDTOs) == 0 {
 		return []*types.Broker{}, err
 	}
@@ -54,11 +54,11 @@ func (bs *brokerStorage) List(ctx context.Context) ([]*types.Broker, error) {
 }
 
 func (bs *brokerStorage) Delete(ctx context.Context, id string) error {
-	return remove(ctx, bs.db, id, brokerTable)
+	return Remove(ctx, bs.db, id, brokerTable)
 }
 
 func (bs *brokerStorage) Update(ctx context.Context, broker *types.Broker) error {
 	b := &Broker{}
 	b.FromDTO(broker)
-	return update(ctx, bs.db, brokerTable, b)
+	return Update(ctx, bs.db, brokerTable, b)
 }

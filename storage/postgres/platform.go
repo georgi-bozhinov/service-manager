@@ -29,12 +29,12 @@ type platformStorage struct {
 func (ps *platformStorage) Create(ctx context.Context, platform *types.Platform) (string, error) {
 	p := &Platform{}
 	p.FromDTO(platform)
-	return create(ctx, ps.db, platformTable, p)
+	return Create(ctx, ps.db, platformTable, p)
 }
 
 func (ps *platformStorage) Get(ctx context.Context, id string) (*types.Platform, error) {
 	platform := &Platform{}
-	if err := get(ctx, ps.db, id, platformTable, platform); err != nil {
+	if err := Get(ctx, ps.db, id, platformTable, platform); err != nil {
 		return nil, err
 	}
 	return platform.ToDTO(), nil
@@ -42,7 +42,7 @@ func (ps *platformStorage) Get(ctx context.Context, id string) (*types.Platform,
 
 func (ps *platformStorage) List(ctx context.Context) ([]*types.Platform, error) {
 	var platforms []Platform
-	err := list(ctx, ps.db, platformTable, map[string][]string{}, &platforms)
+	err := List(ctx, ps.db, platformTable, map[string][]string{}, &platforms)
 	if err != nil || len(platforms) == 0 {
 		return []*types.Platform{}, err
 	}
@@ -54,11 +54,11 @@ func (ps *platformStorage) List(ctx context.Context) ([]*types.Platform, error) 
 }
 
 func (ps *platformStorage) Delete(ctx context.Context, id string) error {
-	return remove(ctx, ps.db, id, platformTable)
+	return Remove(ctx, ps.db, id, platformTable)
 }
 
 func (ps *platformStorage) Update(ctx context.Context, platform *types.Platform) error {
 	p := &Platform{}
 	p.FromDTO(platform)
-	return update(ctx, ps.db, platformTable, p)
+	return Update(ctx, ps.db, platformTable, p)
 }

@@ -29,12 +29,12 @@ type servicePlanStorage struct {
 func (sps *servicePlanStorage) Create(ctx context.Context, servicePlan *types.ServicePlan) (string, error) {
 	plan := &ServicePlan{}
 	plan.FromDTO(servicePlan)
-	return create(ctx, sps.db, servicePlanTable, plan)
+	return Create(ctx, sps.db, servicePlanTable, plan)
 }
 
 func (sps *servicePlanStorage) Get(ctx context.Context, id string) (*types.ServicePlan, error) {
 	plan := &ServicePlan{}
-	if err := get(ctx, sps.db, id, servicePlanTable, plan); err != nil {
+	if err := Get(ctx, sps.db, id, servicePlanTable, plan); err != nil {
 		return nil, err
 	}
 	return plan.ToDTO(), nil
@@ -42,7 +42,7 @@ func (sps *servicePlanStorage) Get(ctx context.Context, id string) (*types.Servi
 
 func (sps *servicePlanStorage) List(ctx context.Context) ([]*types.ServicePlan, error) {
 	var plans []ServicePlan
-	err := list(ctx, sps.db, servicePlanTable, map[string][]string{}, &plans)
+	err := List(ctx, sps.db, servicePlanTable, map[string][]string{}, &plans)
 	if err != nil || len(plans) == 0 {
 		return []*types.ServicePlan{}, err
 	}
@@ -55,7 +55,7 @@ func (sps *servicePlanStorage) List(ctx context.Context) ([]*types.ServicePlan, 
 
 func (sps *servicePlanStorage) ListByCatalogName(ctx context.Context, name string) ([]*types.ServicePlan, error) {
 	var plans []ServicePlan
-	err := list(ctx, sps.db, servicePlanTable, map[string][]string{"catalog_name": {name}}, &plans)
+	err := List(ctx, sps.db, servicePlanTable, map[string][]string{"catalog_name": {name}}, &plans)
 	if err != nil || len(plans) == 0 {
 		return []*types.ServicePlan{}, err
 	}
@@ -67,11 +67,11 @@ func (sps *servicePlanStorage) ListByCatalogName(ctx context.Context, name strin
 }
 
 func (sps *servicePlanStorage) Delete(ctx context.Context, id string) error {
-	return remove(ctx, sps.db, id, servicePlanTable)
+	return Remove(ctx, sps.db, id, servicePlanTable)
 }
 
 func (sps *servicePlanStorage) Update(ctx context.Context, servicePlan *types.ServicePlan) error {
 	plan := &ServicePlan{}
 	plan.FromDTO(servicePlan)
-	return update(ctx, sps.db, servicePlanTable, plan)
+	return Update(ctx, sps.db, servicePlanTable, plan)
 }

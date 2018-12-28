@@ -35,13 +35,79 @@ import (
 const Storage = "postgres"
 
 func init() {
-	storage.Register(Storage, &postgresStorage{})
+	storage.Register(Storage, &postgresStorage{
+		PostgresConnection: &PostgresConnection{},
+	})
+}
+
+type PostgresConnection struct {
+	DB    *sqlx.DB
+	State *storageState
 }
 
 type postgresStorage struct {
-	db            *sqlx.DB
-	state         *storageState
+	*PostgresConnection
 	encryptionKey []byte
+}
+
+func (ps *PostgresConnection) Open(options *storage.Settings) error {
+	var err error
+	if err = options.Validate(); err != nil {
+		return err
+	}
+	if len(options.MigrationsURL) == 0 {
+		return fmt.Errorf("validate Settings: StorageMigrationsURL missing")
+	}
+	if ps.DB == nil {
+		sslModeParam := ""
+		if options.SkipSSLValidation {
+			sslModeParam = "?sslmode=disable"
+		}
+		ps.DB, err = sqlx.Connect(Storage, options.URI+sslModeParam)
+		if err != nil {
+			log.D().Panicln("Could not connect to PostgreSQL:", err)
+		}
+		ps.State = &storageState{
+			lastCheckTime:        time.Now(),
+			mutex:                &sync.RWMutex{},
+			db:                   ps.DB,
+			storageCheckInterval: time.Second * 5,
+		}
+		// ps.encryptionKey = []byte(options.EncryptionKey)
+		log.D().Debugf("Updating database schema using migrations from %s", options.MigrationsURL)
+		if err := ps.updateSchema(options.MigrationsURL); err != nil {
+			log.D().Panicln("Could not update database schema:", err)
+		}
+	}
+	return err
+}
+
+func (ps *PostgresConnection) Close() error {
+	ps.checkOpen()
+	return ps.DB.Close()
+}
+
+func (ps *PostgresConnection) updateSchema(migrationsURL string) error {
+	driver, err := migratepg.WithInstance(ps.DB.DB, &migratepg.Config{})
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance(migrationsURL, "postgres", driver)
+	if err != nil {
+		return err
+	}
+	err = m.Up()
+	if err == migrate.ErrNoChange {
+		log.D().Debug("Database schema already up to date")
+		err = nil
+	}
+	return err
+}
+
+func (ps *PostgresConnection) checkOpen() {
+	if ps.DB == nil {
+		log.D().Panicln("Repository is not yet Open")
+	}
 }
 
 type transactionalWarehouse struct {
@@ -91,7 +157,7 @@ func (ts *transactionalWarehouse) checkOpen() {
 
 func (ps *postgresStorage) InTransaction(ctx context.Context, f func(ctx context.Context, transactionalStorage storage.Warehouse) error) error {
 	ok := false
-	tx, err := ps.db.Beginx()
+	tx, err := ps.DB.Beginx()
 	if err != nil {
 		return err
 	}
@@ -120,97 +186,45 @@ func (ps *postgresStorage) InTransaction(ctx context.Context, f func(ctx context
 
 func (ps *postgresStorage) Ping() error {
 	ps.checkOpen()
-	return ps.state.Get()
+	return ps.State.Get()
 }
 
 func (ps *postgresStorage) Broker() storage.Broker {
 	ps.checkOpen()
-	return &brokerStorage{ps.db}
+	return &brokerStorage{ps.DB}
 }
 
 func (ps *postgresStorage) Platform() storage.Platform {
 	ps.checkOpen()
-	return &platformStorage{ps.db}
+	return &platformStorage{ps.DB}
 }
 
 func (ps *postgresStorage) Credentials() storage.Credentials {
 	ps.checkOpen()
-	return &credentialStorage{ps.db}
+	return &credentialStorage{ps.DB}
 }
 
 func (ps *postgresStorage) ServiceOffering() storage.ServiceOffering {
-	return &serviceOfferingStorage{ps.db}
+	return &serviceOfferingStorage{ps.DB}
 }
 
 func (ps *postgresStorage) ServicePlan() storage.ServicePlan {
-	return &servicePlanStorage{ps.db}
+	return &servicePlanStorage{ps.DB}
 }
 
 func (ps *postgresStorage) Visibility() storage.Visibility {
-	return &visibilityStorage{ps.db}
+	return &visibilityStorage{ps.DB}
 }
 
 func (ps *postgresStorage) Security() storage.Security {
 	ps.checkOpen()
-	return &securityStorage{ps.db, ps.encryptionKey, false, &sync.Mutex{}}
+	return &securityStorage{ps.DB, ps.encryptionKey, false, &sync.Mutex{}}
 }
 
 func (ps *postgresStorage) Open(options *storage.Settings) error {
-	var err error
-	if err = options.Validate(); err != nil {
+	if err := ps.PostgresConnection.Open(options); err != nil {
 		return err
 	}
-	if len(options.MigrationsURL) == 0 {
-		return fmt.Errorf("validate Settings: StorageMigrationsURL missing")
-	}
-	if ps.db == nil {
-		sslModeParam := ""
-		if options.SkipSSLValidation {
-			sslModeParam = "?sslmode=disable"
-		}
-		ps.db, err = sqlx.Connect(Storage, options.URI+sslModeParam)
-		if err != nil {
-			log.D().Panicln("Could not connect to PostgreSQL:", err)
-		}
-		ps.state = &storageState{
-			lastCheckTime:        time.Now(),
-			mutex:                &sync.RWMutex{},
-			db:                   ps.db,
-			storageCheckInterval: time.Second * 5,
-		}
-		ps.encryptionKey = []byte(options.EncryptionKey)
-		log.D().Debugf("Updating database schema using migrations from %s", options.MigrationsURL)
-		if err := ps.updateSchema(options.MigrationsURL); err != nil {
-			log.D().Panicln("Could not update database schema:", err)
-		}
-	}
-	return err
-}
-
-func (ps *postgresStorage) Close() error {
-	ps.checkOpen()
-	return ps.db.Close()
-}
-
-func (ps *postgresStorage) updateSchema(migrationsURL string) error {
-	driver, err := migratepg.WithInstance(ps.db.DB, &migratepg.Config{})
-	if err != nil {
-		return err
-	}
-	m, err := migrate.NewWithDatabaseInstance(migrationsURL, "postgres", driver)
-	if err != nil {
-		return err
-	}
-	err = m.Up()
-	if err == migrate.ErrNoChange {
-		log.D().Debug("Database schema already up to date")
-		err = nil
-	}
-	return err
-}
-
-func (ps *postgresStorage) checkOpen() {
-	if ps.db == nil {
-		log.D().Panicln("Repository is not yet Open")
-	}
+	ps.encryptionKey = []byte(options.EncryptionKey)
+	return nil
 }

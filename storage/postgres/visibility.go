@@ -37,7 +37,7 @@ type visibilityStorage struct {
 func (vs *visibilityStorage) Create(ctx context.Context, visibility *types.Visibility) (string, error) {
 	v := &Visibility{}
 	v.FromDTO(visibility)
-	id, err := create(ctx, vs.db, visibilityTable, v)
+	id, err := Create(ctx, vs.db, visibilityTable, v)
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +53,7 @@ func (vs *visibilityStorage) createLabels(ctx context.Context, visibilityID stri
 		return err
 	}
 	for _, label := range vls {
-		if _, err := create(ctx, vs.db, visibilityLabelsTable, label); err != nil {
+		if _, err := Create(ctx, vs.db, visibilityLabelsTable, label); err != nil {
 			return err
 		}
 	}
@@ -128,7 +128,7 @@ func (vs *visibilityStorage) Delete(ctx context.Context, criteria ...query.Crite
 func (vs *visibilityStorage) Update(ctx context.Context, visibility *types.Visibility, labelChanges ...*query.LabelChange) error {
 	v := &Visibility{}
 	v.FromDTO(visibility)
-	if err := update(ctx, vs.db, visibilityTable, v); err != nil {
+	if err := Update(ctx, vs.db, visibilityTable, v); err != nil {
 		return err
 	}
 	if err := vs.updateLabels(ctx, v.ID, labelChanges); err != nil {

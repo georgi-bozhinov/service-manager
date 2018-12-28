@@ -63,7 +63,7 @@ type pgDB interface {
 	sqlx.ExtContext
 }
 
-func create(ctx context.Context, db pgDB, table string, dto interface{}) (string, error) {
+func Create(ctx context.Context, db pgDB, table string, dto interface{}) (string, error) {
 	var lastInsertId string
 	set := getDBTags(dto)
 
@@ -94,7 +94,7 @@ func create(ctx context.Context, db pgDB, table string, dto interface{}) (string
 	return lastInsertId, checkIntegrityViolation(ctx, checkUniqueViolation(ctx, err))
 }
 
-func get(ctx context.Context, db getterContext, id string, table string, dto interface{}) error {
+func Get(ctx context.Context, db getterContext, id string, table string, dto interface{}) error {
 	sqlQuery := "SELECT * FROM " + table + " WHERE id=$1"
 	log.C(ctx).Debugf("Executing query %s", sqlQuery)
 	err := db.GetContext(ctx, dto, sqlQuery, &id)
@@ -181,7 +181,7 @@ func constructBaseQueryForLabelable(labelsEntity Labelable, baseTableName string
 	return fmt.Sprintf(baseQuery, baseTableName, labelsTableName)
 }
 
-func list(ctx context.Context, db selecterContext, table string, filter map[string][]string, dtos interface{}) error {
+func List(ctx context.Context, db selecterContext, table string, filter map[string][]string, dtos interface{}) error {
 	sqlQuery := "SELECT * FROM " + table
 	if len(filter) != 0 {
 		andPairs := make([]string, 0)
@@ -203,7 +203,7 @@ func list(ctx context.Context, db selecterContext, table string, filter map[stri
 	return db.SelectContext(ctx, dtos, sqlQuery)
 }
 
-func remove(ctx context.Context, db sqlx.ExecerContext, id string, table string) error {
+func Remove(ctx context.Context, db sqlx.ExecerContext, id string, table string) error {
 	sqlQuery := "DELETE FROM " + table + " WHERE id=$1"
 	log.C(ctx).Debugf("Executing query %s", sqlQuery)
 	result, err := db.ExecContext(ctx, sqlQuery, id)
@@ -213,7 +213,7 @@ func remove(ctx context.Context, db sqlx.ExecerContext, id string, table string)
 	return checkRowsAffected(ctx, result)
 }
 
-func update(ctx context.Context, db namedExecerContext, table string, dto interface{}) error {
+func Update(ctx context.Context, db namedExecerContext, table string, dto interface{}) error {
 	updateQueryString := updateQuery(table, dto)
 	if updateQueryString == "" {
 		log.C(ctx).Debugf("%s update: Nothing to update", table)

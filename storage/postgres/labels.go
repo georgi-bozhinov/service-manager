@@ -64,7 +64,7 @@ func addLabel(ctx context.Context, newLabelFunc func(labelID string, labelKey st
 		labelID := uuids.String()
 		newLabel := newLabelFunc(labelID, key, labelValue)
 		labelTable, _, _ := newLabel.Label()
-		if _, err := create(ctx, db, labelTable, newLabel); err != nil {
+		if _, err := Create(ctx, db, labelTable, newLabel); err != nil {
 			if err == util.ErrAlreadyExistsInStorage {
 				return &query.LabelChangeError{Message: fmt.Sprintf("label with key %s and value %s already exists for this entity", key, labelValue)}
 			}
