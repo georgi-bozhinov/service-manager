@@ -48,6 +48,8 @@ type ServiceManagerBuilder struct {
 
 	ctx context.Context
 	cfg *server.Settings
+
+	Storage storage.Storage
 }
 
 // ServiceManager  struct
@@ -120,9 +122,10 @@ func New(ctx context.Context, cancel context.CancelFunc, env env.Environment) *S
 	API.AddHealthIndicator(&storage.HealthIndicator{Pinger: storage.PingFunc(smStorage.Ping)})
 
 	return &ServiceManagerBuilder{
-		ctx: ctx,
-		cfg: cfg.Server,
-		API: API,
+		ctx:     ctx,
+		cfg:     cfg.Server,
+		API:     API,
+		Storage: smStorage,
 	}
 }
 

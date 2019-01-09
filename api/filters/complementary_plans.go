@@ -36,25 +36,26 @@ import (
 	"github.com/Peripli/service-manager/pkg/web"
 )
 
-// FreeServicePlansFilter reconciles the state of the free plans offered by all service brokers registered in SM. The
-// filter makes sure that a public visibility exists for each free plan present in SM DB.
-type FreeServicePlansFilter struct {
+// ComplementaryServicePlansFilter reconciles the state of the complementary plans offered by all service brokers registered in SM. The
+// filter makes sure that a public visibility exists for each complementary plan present in SM DB.
+// Complementary plans are marked as complementary is the catalog service plan metadata.
+type ComplementaryServicePlansFilter struct {
 	Repository storage.Repository
 }
 
-func (fsp *FreeServicePlansFilter) Name() string {
-	return "FreePlansFilter"
+func (csp *ComplementaryServicePlansFilter) Name() string {
+	return "ComplementaryPlansFilter"
 }
 
-func (fsp *FreeServicePlansFilter) Run(req *web.Request, next web.Handler) (*web.Response, error) {
+func (csp *ComplementaryServicePlansFilter) Run(req *web.Request, next web.Handler) (*web.Response, error) {
 	response, err := next.Handle(req)
 	if err != nil {
 		return nil, err
 	}
 	ctx := req.Context()
 	brokerID := gjson.GetBytes(response.Body, "id").String()
-	log.C(ctx).Debugf("Reconciling free plans for broker with id: %s", brokerID)
-	if err := fsp.Repository.InTransaction(ctx, func(ctx context.Context, storage storage.Warehouse) error {
+	log.C(ctx).Debugf("Reconciling complementary plans for broker with id: %s", brokerID)
+	if err := csp.Repository.InTransaction(ctx, func(ctx context.Context, storage storage.Warehouse) error {
 		soRepository := storage.ServiceOffering()
 		vRepository := storage.Visibility()
 
@@ -65,14 +66,14 @@ func (fsp *FreeServicePlansFilter) Run(req *web.Request, next web.Handler) (*web
 		for _, serviceOffering := range catalog {
 			for _, servicePlan := range serviceOffering.Plans {
 				planID := servicePlan.ID
-				isFree := servicePlan.Free
+				isComplementary := gjson.GetBytes(servicePlan.Metadata, "complementary").Bool()
 				hasPublicVisibility := false
 				visibilitiesForPlan, err := vRepository.ListByServicePlanID(ctx, planID)
 				if err != nil {
 					return err
 				}
 				for _, visibility := range visibilitiesForPlan {
-					if isFree {
+					if isComplementary {
 						if visibility.PlatformID == "" {
 							hasPublicVisibility = true
 							continue
@@ -92,7 +93,7 @@ func (fsp *FreeServicePlansFilter) Run(req *web.Request, next web.Handler) (*web
 					}
 				}
 
-				if isFree && !hasPublicVisibility {
+				if isComplementary && !hasPublicVisibility {
 					UUID, err := uuid.NewV4()
 					if err != nil {
 						return fmt.Errorf("could not generate GUID for visibility: %s", err)
@@ -117,11 +118,11 @@ func (fsp *FreeServicePlansFilter) Run(req *web.Request, next web.Handler) (*web
 	}); err != nil {
 		return nil, err
 	}
-	log.C(ctx).Debugf("Successfully finished reconciling free plans for broker with id %s", brokerID)
+	log.C(ctx).Debugf("Successfully finished reconciling complementary plans for broker with id %s", brokerID)
 	return response, nil
 }
 
-func (fsp *FreeServicePlansFilter) FilterMatchers() []web.FilterMatcher {
+func (csp *ComplementaryServicePlansFilter) FilterMatchers() []web.FilterMatcher {
 	return []web.FilterMatcher{
 		{
 			Matchers: []web.Matcher{
