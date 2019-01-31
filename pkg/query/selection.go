@@ -71,8 +71,10 @@ const (
 	CloseBracket rune = ']'
 	// Separator is the separator between field and label queries
 	Separator rune = '|'
-	// OperandSeparator is the separator between the operator and the operands
-	OperandSeparator rune = ' '
+	// OperandSpaceSeparator is the separator between the operator and the operands
+	OperandSpaceSeparator rune = ' '
+	// OperandPlusSeparator is the separator between the operator and the operands
+	OperandPlusSeparator rune = '+'
 )
 
 // CriterionType is a type of criteria to be applied when querying
@@ -258,7 +260,8 @@ func process(input string, criteriaType CriterionType) ([]Criterion, error) {
 		} else {
 			remaining := input[i:]
 			for _, op := range operators {
-				if strings.HasPrefix(remaining, fmt.Sprintf("%c%s%c", OperandSeparator, op, OperandSeparator)) {
+				if strings.HasPrefix(remaining, fmt.Sprintf("%c%s%c", OperandSpaceSeparator, op, OperandSpaceSeparator)) ||
+					strings.HasPrefix(remaining, fmt.Sprintf("%c%s%c", OperandPlusSeparator, op, OperandPlusSeparator)) {
 					leftOp = input[j:i]
 					operator = op
 					break

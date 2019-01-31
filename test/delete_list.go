@@ -57,6 +57,51 @@ func DescribeDeleteListFor(ctx *common.TestContext, t TestCase) bool {
 				expectedStatusCode: http.StatusOK,
 			},
 		),
+		Entry("returns 200 for operator =",
+			deleteOpEntry{
+				resourcesToExpectBeforeOp: func() []common.Object {
+					return []common.Object{r[0]}
+				},
+				queryTemplate: "%s+=+%v",
+				queryArgs: func() common.Object {
+					return r[0]
+				},
+				resourcesNotToExpectAfterOp: func() []common.Object {
+					return []common.Object{r[0]}
+				},
+				expectedStatusCode: http.StatusOK,
+			},
+		),
+		Entry("returns 200 for operator =",
+			deleteOpEntry{
+				resourcesToExpectBeforeOp: func() []common.Object {
+					return []common.Object{r[0]}
+				},
+				queryTemplate: "%s+= %v",
+				queryArgs: func() common.Object {
+					return r[0]
+				},
+				resourcesNotToExpectAfterOp: func() []common.Object {
+					return []common.Object{r[0]}
+				},
+				expectedStatusCode: http.StatusOK,
+			},
+		),
+		Entry("returns 200 for operator =",
+			deleteOpEntry{
+				resourcesToExpectBeforeOp: func() []common.Object {
+					return []common.Object{r[0]}
+				},
+				queryTemplate: "%s =+%v",
+				queryArgs: func() common.Object {
+					return r[0]
+				},
+				resourcesNotToExpectAfterOp: func() []common.Object {
+					return []common.Object{r[0]}
+				},
+				expectedStatusCode: http.StatusOK,
+			},
+		),
 		Entry("returns 200 for operator !=",
 			deleteOpEntry{
 				resourcesToExpectBeforeOp: func() []common.Object {
