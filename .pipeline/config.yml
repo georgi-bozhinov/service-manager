@@ -1,0 +1,34 @@
+#Project Setup
+general:
+  githubApiUrl: 'https://api.github.com'
+  githubServerUrl: 'https://github.com'
+  gitSshKeyCredentialsId: '00b6f4fb-3786-43d4-9aba-53e7014f77cc	' #needed to allow sshagent to run with local ssh key, see https://github.wdf.sap.corp/ContinuousDelivery/piper-library/pull/992/files#diff-b915177086c2389b01a8af4876016407L48
+  githubTokenCredentialsId: 'github-os-token'
+
+steps:
+  updatePackageRefs:
+    deps: []
+  pushChangesToRepo:
+    branch: 'jenkins'
+  pollBuilds:
+    pollTimeout: 10
+    branch: 'jenkins'
+    expectedStatus: 'pending'
+  buildDepProjects:
+    projects: []
+    # projects: ['b1', 'b2', 'b3']
+
+  setupPipelineEnvironment:
+    buildDiscarder:
+      daysToKeep: -1
+      numToKeep: 10
+      artifactDaysToKeep: -1
+      artifactNumToKeep: -1
+    configYmlFile: '.pipeline/config.yml'
+    githubApiUrl: 'https://api.github.com'
+    gitHttpsUrl: 'https://github.com/${githubOrg}/${githubRepo}.git'
+    gitSshUrl: 'git@github.com:${githubOrg}/${githubRepo}.git'
+    relatedLibraries:
+    - 'piper-lib-os'
+    - 'piper-lib'
+    storeGithubStatistics: false
