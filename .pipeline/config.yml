@@ -11,7 +11,7 @@ steps:
   pushChangesToRepo:
     branch: 'jenkins'
   pollBuilds:
-    pollTimeout: 10
+    pollTimeout: 1
     branch: 'jenkins'
     expectedStatus: 'pending'
   buildDepProjects:
