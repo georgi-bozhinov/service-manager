@@ -3,7 +3,7 @@ general:
   githubApiUrl: 'https://api.github.com'
   githubServerUrl: 'https://github.com'
   gitSshKeyCredentialsId: '00b6f4fb-3786-43d4-9aba-53e7014f77cc	' #needed to allow sshagent to run with local ssh key, see https://github.wdf.sap.corp/ContinuousDelivery/piper-library/pull/992/files#diff-b915177086c2389b01a8af4876016407L48
-  githubTokenCredentialsId: 'github-os-token'
+  githubTokenCredentialsId: 'github-token-os'
 
 steps:
   updatePackageRefs:
