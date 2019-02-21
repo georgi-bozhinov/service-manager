@@ -9,10 +9,10 @@ steps:
   updatePackageRefs:
     deps: []
   pushChangesToRepo:
-    branch: 'jenkins'
+    branch: 'new-version'
   pollBuilds:
     pollTimeout: 1
-    branch: 'jenkins'
+    branch: 'new-version'
     expectedStatus: 'pending'
   buildDepProjects:
     projects: []
