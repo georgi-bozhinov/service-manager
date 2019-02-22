@@ -16,6 +16,8 @@ steps:
     expectedStatus: 'pending'
   buildDepProjects:
     projects: []
+  XMakeBuild:
+    buildWithXMake: false
     # projects: ['b1', 'b2', 'b3']
 
   setupPipelineEnvironment:
