@@ -17,7 +17,6 @@ steps:
     projects: ['release-sb-proxy']
   XMakeBuild:
     buildWithXMake: false
-    # projects: ['b1', 'b2', 'b3']
 
   setupPipelineEnvironment:
     buildDiscarder:
