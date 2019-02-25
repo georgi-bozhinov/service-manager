@@ -30,5 +30,4 @@ steps:
     gitSshUrl: 'git@github.com:${githubOrg}/${githubRepo}.git'
     relatedLibraries:
     - 'piper-lib-os'
-    - 'piper-lib'
     storeGithubStatistics: false
