@@ -14,7 +14,7 @@ steps:
     timeoutSeconds: 60
     branch: 'new-version'
   buildDepProjects:
-    projects: ['release-sb-proxy']
+    projects: ['release-sb-proxy', 'release-sap-sm']
   XMakeBuild:
     buildWithXMake: false
 
