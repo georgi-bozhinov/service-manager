@@ -11,11 +11,10 @@ steps:
   pushChangesToRepo:
     branch: 'new-version'
   pollBuilds:
-    pollTimeout: 1
+    timeoutSeconds: 60
     branch: 'new-version'
-    expectedStatus: 'pending'
   buildDepProjects:
-    projects: []
+    projects: ['release-sb-proxy']
   XMakeBuild:
     buildWithXMake: false
     # projects: ['b1', 'b2', 'b3']
