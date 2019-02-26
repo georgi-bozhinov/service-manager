@@ -4,6 +4,7 @@ general:
   githubServerUrl: 'https://github.com'
   gitSshKeyCredentialsId: '00b6f4fb-3786-43d4-9aba-53e7014f77cc'
   githubTokenCredentialsId: 'github-token-os'
+  buildWithXMake: false
 
 steps:
   updatePackageRefs:
