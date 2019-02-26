@@ -11,7 +11,7 @@ steps:
   pushChangesToRepo:
     branch: 'new-version'
   pollBuilds:
-    timeoutSeconds: 30
+    timeoutSeconds: 10
     branch: 'new-version'
   buildDepProjects:
     projects: ['release-sb-proxy', 'release-sap-sm']
