@@ -10,6 +10,7 @@ general:
 steps:
   updatePackageRefs:
     deps: []
+    skipDepRebuild: true
   pushChangesToRepo:
     branch: 'new-version'
   pollBuilds:
