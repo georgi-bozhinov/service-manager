@@ -13,6 +13,7 @@ steps:
     branch: 'new-version'
   pollBuilds:
     timeoutSeconds: 5
+    pollIntervalSeconds: 5
     branch: 'new-version'
   buildDepProjects:
     projects: ['release-sb-proxy', 'release-sap-sm']
