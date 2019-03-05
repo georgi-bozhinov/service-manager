@@ -1,6 +1,6 @@
 # Service Manager Release Notes
 
-## v0.x.0
+## v0.2.0
 xxxx-xx-xx
 
 * Testing release processes stuff stuff
