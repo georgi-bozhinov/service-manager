@@ -1,5 +1,10 @@
 # Service Manager Release Notes
 
+## 0.1120.0
+xxxx-xx-xx
+
+* release process
+
 ## 0.1119.0
 xxxx-xx-xx
 
